@@ -22,9 +22,3 @@ jobs:
 
       - name: Run local tests
         run: ./gradlew testDebugUnitTest
-
-      - name: Upload build reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-reports
-          path: app/build/reports
