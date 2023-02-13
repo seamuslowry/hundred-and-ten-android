@@ -36,3 +36,9 @@ jobs:
           disk-size: 6000M
           heap-size: 600M
           script: ./gradlew connectedDebugAndroidTest
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports-${{ matrix.api-level }}
+          path: '*/build/reports/androidTests'
