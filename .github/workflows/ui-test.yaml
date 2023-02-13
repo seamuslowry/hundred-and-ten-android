@@ -7,9 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   androidTest:
-    needs: build
     runs-on: macOS-latest # enables hardware acceleration in the virtual machine
     timeout-minutes: 55
     strategy:
