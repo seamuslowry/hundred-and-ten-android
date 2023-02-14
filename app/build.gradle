@@ -15,11 +15,11 @@ spotless {
 }
 
 android {
-    namespace 'com.example.hundredandten'
+    namespace 'seamuslowry.hundredandten'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.hundredandten"
+        applicationId "seamuslowry.hundredandten"
         minSdk 24
         targetSdk 33
         versionCode 1

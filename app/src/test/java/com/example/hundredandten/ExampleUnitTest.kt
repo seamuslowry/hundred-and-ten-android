@@ -1,4 +1,4 @@
-package com.example.hundredandten
+package seamuslowry.hundredandten
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
