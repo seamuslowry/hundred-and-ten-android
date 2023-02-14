@@ -1,4 +1,4 @@
-package com.example.hundredandten.ui.theme
+package seamuslowry.hundredandten.ui.theme
 
 import android.app.Activity
 import android.os.Build

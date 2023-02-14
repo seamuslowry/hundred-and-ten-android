@@ -1,4 +1,4 @@
-package com.example.hundredandten.ui.theme
+package seamuslowry.hundredandten.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
