@@ -1,5 +1,6 @@
 package seamuslowry.hundredandten
 
+import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import seamuslowry.hundredandten.ui.theme.HundredAndTenTheme
 
 private const val TAG = "MainActivity"
@@ -44,7 +47,7 @@ class MainActivity : ComponentActivity() {
         signInRequest = BeginSignInRequest.builder()
             .setPasswordRequestOptions(
                 BeginSignInRequest.PasswordRequestOptions.builder()
-                    .setSupported(true)
+                    .setSupported(false) // TODO check this out; see how to disallow getting passwords back
                     .build(),
             )
             .setGoogleIdTokenRequestOptions(
@@ -82,6 +85,53 @@ class MainActivity : ComponentActivity() {
                 // do nothing and continue presenting the signed-out UI.
                 e.localizedMessage?.let { Log.d(TAG, it) }
             }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            REQ_ONE_TAP -> {
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(data)
+                    val idToken = credential.googleIdToken
+                    val password = credential.password
+                    when {
+                        idToken != null -> {
+                            // Got an ID token from Google. Use it to authenticate
+                            // with your backend.
+                            Log.d(TAG, "Got ID token.")
+                        }
+                        password != null -> {
+                            // Got a saved username and password. Use them to authenticate
+                            // with your backend.
+                            Log.d(TAG, "Got password.")
+                        }
+                        else -> {
+                            // Shouldn't happen.
+                            Log.d(TAG, "No ID token or password!")
+                        }
+                    }
+                } catch (e: ApiException) {
+                    when (e.statusCode) {
+                        CommonStatusCodes.CANCELED -> {
+                            Log.d(TAG, "One-tap dialog was closed.")
+                        }
+                        CommonStatusCodes.NETWORK_ERROR -> {
+                            Log.d(TAG, "One-tap encountered a network error.")
+                            // Try again or just ignore.
+                        }
+                        else -> {
+                            Log.d(
+                                TAG,
+                                "Couldn't get credential from result." +
+                                    " (${e.localizedMessage})",
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
