@@ -21,6 +21,8 @@ private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
 
+    private val REQ_ONE_TAP = 666
+
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +66,7 @@ class MainActivity : ComponentActivity() {
                 try {
                     startIntentSenderForResult(
                         result.pendingIntent.intentSender,
-                        1,
+                        REQ_ONE_TAP,
                         null,
                         0,
                         0,
