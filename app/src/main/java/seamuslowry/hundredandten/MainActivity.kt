@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
         oneTapClient.beginSignIn(signInRequest)
             .addOnSuccessListener(this) { result ->
                 try {
+                    // possible ref for deprecation warning: https://developers.google.com/identity/one-tap/android/linked-account-signin-client
                     startIntentSenderForResult(
                         result.pendingIntent.intentSender,
                         REQ_ONE_TAP,
