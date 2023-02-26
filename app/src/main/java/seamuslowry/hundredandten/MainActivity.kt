@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     Log.d(TAG, "Will eventually use: ${signInCredentials.googleIdToken}")
                     // hit the .auth/login/google endpoint for auth code
                     // put in X-ZUMO-AUTH header to authorize
-                    // need to figure out how to include identity information
+                    // call endpoint to set / update user information
                 } catch (e: ApiException) {
                     Log.e(TAG, "Sign-in failed with error code:", e)
                 }
