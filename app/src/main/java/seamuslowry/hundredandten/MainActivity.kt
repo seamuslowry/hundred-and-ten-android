@@ -40,6 +40,9 @@ class MainActivity : ComponentActivity() {
                         .getSignInCredentialFromIntent(result.data)
 
                     Log.d(TAG, "Will eventually use: ${signInCredentials.googleIdToken}")
+                    // hit the .auth/login/google endpoint for auth code
+                    // put in X-ZUMO-AUTH header to authorize
+                    // need to figure out how to include identity information
                 } catch (e: ApiException) {
                     Log.e(TAG, "Sign-in failed with error code:", e)
                 }
