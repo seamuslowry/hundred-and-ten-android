@@ -11,8 +11,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import seamuslowry.hundredandten.ui.screens.login.LoginScreen
 import seamuslowry.hundredandten.ui.theme.HundredAndTenTheme
 
-private const val TAG = "MainActivity"
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
