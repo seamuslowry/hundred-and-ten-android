@@ -1,11 +1,11 @@
-package seamuslowry.hundredandten.network.models
+package seamuslowry.hundredandten.sources.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResponseUser(
-    @SerialName("authenticationToken") val authenticationToken: String,
+    @SerialName("userId") val userId: String,
 )
 
 @Serializable

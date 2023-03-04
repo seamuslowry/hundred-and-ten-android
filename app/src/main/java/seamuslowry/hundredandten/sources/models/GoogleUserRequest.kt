@@ -1,4 +1,4 @@
-package seamuslowry.hundredandten.network.models
+package seamuslowry.hundredandten.sources.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
