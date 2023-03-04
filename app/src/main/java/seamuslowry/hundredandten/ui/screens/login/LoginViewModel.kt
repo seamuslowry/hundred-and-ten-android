@@ -77,7 +77,7 @@ class LoginViewModel @Inject constructor(
                     // call endpoint to set / update user information
 
                     val idToken = signInCredentials.googleIdToken ?: run {
-                        appLoginState = AppLoginState.Error
+                        appLoginState = AppLoginState.Error // TODO error message
                         return@handleGoogleSignInResult
                     }
 
