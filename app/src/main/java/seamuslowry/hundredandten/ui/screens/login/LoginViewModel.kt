@@ -44,8 +44,6 @@ class LoginViewModel @Inject constructor(
         Identity.getSignInClient(application)
             .beginSignIn(
                 BeginSignInRequest.Builder()
-                    // TODO why doesn't this allow staying signed in
-                    .setAutoSelectEnabled(true)
                     .setGoogleIdTokenRequestOptions(
                         BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
                             .setSupported(true)
