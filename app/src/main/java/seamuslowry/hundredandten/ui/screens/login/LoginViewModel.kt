@@ -73,19 +73,23 @@ class LoginViewModel @Inject constructor(
                     val signInCredentials = Identity.getSignInClient(application)
                         .getSignInCredentialFromIntent(result.data)
 
-                    // hit the .auth/login/google endpoint for auth code
-                    // put in X-ZUMO-AUTH header to authorize
-                    // call endpoint to set / update user information
+                    // https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-customize-sign-in-out#client-directed-sign-in
+                    // need an authorization code to send with the request
+                    // some examples online have used an access token for the authorization code
 
                     val idToken = signInCredentials.googleIdToken ?: run {
                         appLoginState = AppLoginState.Error // TODO error message
                         return@handleGoogleSignInResult
                     }
 
+                    Log.d(TAG, idToken)
+
                     viewModelScope.launch {
                         appLoginState = AppLoginState.Loading
                         appLoginState = try {
                             val user = repo.getFromIdToken(idToken)
+                            repo.getMe(user.pictureUrl)
+                            repo.getRefresh(user.pictureUrl)
                             AppLoginState.Success(user)
                         } catch (e: Exception) {
                             AppLoginState.Error
