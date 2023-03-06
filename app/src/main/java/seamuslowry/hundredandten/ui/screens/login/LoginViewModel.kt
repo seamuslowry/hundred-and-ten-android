@@ -1,17 +1,17 @@
 package seamuslowry.hundredandten.ui.screens.login
 
 import android.app.Application
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -36,32 +36,24 @@ class LoginViewModel @Inject constructor(
     var appLoginState: AppLoginState by mutableStateOf(AppLoginState.Unused)
         private set
 
+    private fun getSignInClient(clientId: String) = GoogleSignIn.getClient(
+        application,
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestIdToken(clientId)
+            .requestServerAuthCode(clientId)
+            .build(),
+    )
+
     fun startGoogleSignIn(
         clientId: String,
-        launchActivityResult: (IntentSenderRequest) -> Unit,
+        launchActivityResult: (Intent) -> Unit,
     ) {
         appLoginState = AppLoginState.Loading
-        Identity.getSignInClient(application)
-            .beginSignIn(
-                BeginSignInRequest.Builder()
-                    .setGoogleIdTokenRequestOptions(
-                        BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                            .setSupported(true)
-                            .setServerClientId(clientId)
-                            .setFilterByAuthorizedAccounts(false)
-                            .build(),
-                    )
-                    .build(),
-            )
-            .addOnSuccessListener { result ->
-                launchActivityResult(
-                    IntentSenderRequest.Builder(result.pendingIntent.intentSender).build(),
-                )
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Sign-in failed because:", e)
-                appLoginState = AppLoginState.Error // TODO error message
-            }
+
+        // TODO use GoogleSignIn.getLastSignedInAccount(this);
+
+        launchActivityResult(getSignInClient(clientId).signInIntent)
     }
 
     fun handleGoogleSignInResult(
@@ -70,24 +62,20 @@ class LoginViewModel @Inject constructor(
         when (result.resultCode) {
             ComponentActivity.RESULT_OK -> {
                 try {
-                    val signInCredentials = Identity.getSignInClient(application)
-                        .getSignInCredentialFromIntent(result.data)
+                    val signInData = GoogleSignIn.getSignedInAccountFromIntent(result.data).result
 
-                    // https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-customize-sign-in-out#client-directed-sign-in
-                    // need an authorization code to send with the request
-                    // some examples online have used an access token for the authorization code
-
-                    val idToken = signInCredentials.googleIdToken ?: run {
+                    val idToken = signInData.idToken ?: run {
+                        appLoginState = AppLoginState.Error // TODO error message
+                        return@handleGoogleSignInResult
+                    }
+                    val authorizationCode = signInData.serverAuthCode ?: run {
                         appLoginState = AppLoginState.Error // TODO error message
                         return@handleGoogleSignInResult
                     }
 
-                    Log.d(TAG, idToken)
-
                     viewModelScope.launch {
-                        appLoginState = AppLoginState.Loading
                         appLoginState = try {
-                            val user = repo.getFromIdToken(idToken)
+                            val user = repo.getFromCredentials(idToken, authorizationCode)
                             repo.getMe(user.pictureUrl)
                             repo.getRefresh(user.pictureUrl)
                             AppLoginState.Success(user)
@@ -107,8 +95,17 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
-        Identity.getSignInClient(application).signOut()
+    fun signOut(clientId: String) {
+        // TODO make this not just a bad proof of concept
+        val currentState = appLoginState
+        if (currentState !is AppLoginState.Success) {
+            return
+        }
+
+        viewModelScope.launch {
+            repo.logout(currentState.user.pictureUrl)
+        }
+        getSignInClient(clientId).signOut()
         appLoginState = AppLoginState.Unused
     }
 }

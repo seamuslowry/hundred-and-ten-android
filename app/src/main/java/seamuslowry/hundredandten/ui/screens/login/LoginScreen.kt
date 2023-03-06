@@ -19,7 +19,7 @@ fun LoginScreen(
     val appLoginState = viewModel.appLoginState
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        contract = ActivityResultContracts.StartActivityForResult(),
         onResult = viewModel::handleGoogleSignInResult,
     )
 
@@ -34,7 +34,7 @@ fun LoginScreen(
             Text(text = stringResource(id = R.string.app_name))
         }
         Button(
-            onClick = { viewModel.signOut() },
+            onClick = { viewModel.signOut(clientId) },
             enabled = viewModel.appLoginState is AppLoginState.Success,
             modifier = modifier,
         ) {

@@ -6,17 +6,22 @@ import seamuslowry.hundredandten.sources.models.GoogleUserRequest
 import javax.inject.Inject
 
 interface UserRepository {
-    suspend fun getFromIdToken(idToken: String): User
-    suspend fun getMe(authToken: String)
-    suspend fun getRefresh(authToken: String)
+    suspend fun getFromCredentials(idToken: String, authorizationCode: String): User
+    suspend fun getMe(authToken: String) // TODO get rid of
+    suspend fun getRefresh(authToken: String) // TODO return
+    suspend fun logout(authToken: String)
 }
 
 class NetworkUserRepository @Inject constructor(
     private val source: UserSource,
 ) : UserRepository {
-    override suspend fun getFromIdToken(idToken: String): User {
-        val response = source.getGoogleUser(GoogleUserRequest(idToken), "offline")
+    override suspend fun getFromCredentials(idToken: String, authorizationCode: String): User {
+        val response = source.getGoogleUser(GoogleUserRequest(idToken, authorizationCode))
         return User(response.user.userId, response.authenticationToken)
+    }
+
+    override suspend fun logout(authToken: String) {
+        source.logout(authToken)
     }
 
     override suspend fun getMe(authToken: String) {

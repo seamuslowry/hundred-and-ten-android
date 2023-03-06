@@ -4,12 +4,11 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.Query
 import seamuslowry.hundredandten.sources.models.GoogleUserRequest
 import seamuslowry.hundredandten.sources.models.GoogleUserResponse
 
 interface UserSource {
-    suspend fun getGoogleUser(request: GoogleUserRequest, accessType: String): GoogleUserResponse
+    suspend fun getGoogleUser(request: GoogleUserRequest): GoogleUserResponse
 
     suspend fun getMe(
         token: String,
@@ -17,7 +16,7 @@ interface UserSource {
 
     suspend fun getRefresh(
         token: String,
-    ): NotImportant
+    ): GoogleUserResponse
 
     suspend fun logout(
         token: String,
@@ -31,7 +30,6 @@ interface NetworkUserSource : UserSource {
     @POST(".auth/login/google")
     override suspend fun getGoogleUser(
         @Body request: GoogleUserRequest,
-        @Query("access_type") accessType: String,
     ): GoogleUserResponse
 
     @GET(".auth/me")
@@ -42,7 +40,7 @@ interface NetworkUserSource : UserSource {
     @GET(".auth/refresh")
     override suspend fun getRefresh(
         @Header("X-ZUMO-AUTH") token: String,
-    ): NotImportant
+    ): GoogleUserResponse
 
     // TODO verify works
     @GET(".auth/logout")
