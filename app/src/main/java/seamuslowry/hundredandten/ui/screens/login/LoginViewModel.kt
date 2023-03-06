@@ -60,6 +60,7 @@ class LoginViewModel @Inject constructor(
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Sign-in failed because:", e)
+                appLoginState = AppLoginState.Error // TODO error message
             }
     }
 
@@ -100,5 +101,10 @@ class LoginViewModel @Inject constructor(
                 appLoginState = AppLoginState.Error // TODO error message
             }
         }
+    }
+
+    fun signOut() {
+        Identity.getSignInClient(application).signOut()
+        appLoginState = AppLoginState.Unused
     }
 }

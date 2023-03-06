@@ -2,6 +2,7 @@ package seamuslowry.hundredandten.ui.screens.login
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,12 +25,21 @@ fun LoginScreen(
 
     val clientId = stringResource(id = R.string.client_id)
 
-    Button(
-        onClick = { viewModel.startGoogleSignIn(clientId, launcher::launch) },
-        enabled = viewModel.appLoginState !is AppLoginState.Loading,
-        modifier = modifier,
-    ) {
-        Text(text = stringResource(id = R.string.app_name))
+    Column {
+        Button(
+            onClick = { viewModel.startGoogleSignIn(clientId, launcher::launch) },
+            enabled = viewModel.appLoginState !is AppLoginState.Loading,
+            modifier = modifier,
+        ) {
+            Text(text = stringResource(id = R.string.app_name))
+        }
+        Button(
+            onClick = { viewModel.signOut() },
+            enabled = viewModel.appLoginState is AppLoginState.Success,
+            modifier = modifier,
+        ) {
+            Text(text = stringResource(id = R.string.client_id))
+        }
     }
     when (appLoginState) {
         is AppLoginState.Success -> Text(text = appLoginState.user.id)
