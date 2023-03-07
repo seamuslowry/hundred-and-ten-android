@@ -1,12 +1,11 @@
 package seamuslowry.hundredandten.data
 
-import seamuslowry.hundredandten.models.User
 import seamuslowry.hundredandten.sources.UserSource
 import seamuslowry.hundredandten.sources.models.GoogleUserRequest
 import javax.inject.Inject
 
 interface UserRepository {
-    suspend fun getFromIdToken(idToken: String): User
+    suspend fun getAccessToken(idToken: String): String
     suspend fun getMe(authToken: String) // TODO get rid of
 
 //    suspend fun getRefresh(authToken: String) // TODO return
@@ -16,9 +15,9 @@ interface UserRepository {
 class NetworkUserRepository @Inject constructor(
     private val source: UserSource,
 ) : UserRepository {
-    override suspend fun getFromIdToken(idToken: String): User {
+    override suspend fun getAccessToken(idToken: String): String {
         val response = source.getGoogleUser(GoogleUserRequest(idToken))
-        return User(response.user.userId, response.authenticationToken)
+        return response.authenticationToken
     }
 
     override suspend fun logout(authToken: String) {
