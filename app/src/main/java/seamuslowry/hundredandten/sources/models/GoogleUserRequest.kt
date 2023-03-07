@@ -6,5 +6,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GoogleUserRequest(
     @SerialName("id_token") val idToken: String,
-    @SerialName("authorization_code") val authorizationCode: String,
 )

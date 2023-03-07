@@ -28,6 +28,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "GOOGLE_SIGN_IN_SERVER_CLIENT_ID", "\"80097063421-no8el98n0f188in9pur04r9h8sh7rsen.apps.googleusercontent.com\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true

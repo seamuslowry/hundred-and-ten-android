@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,33 +17,37 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
-    val appLoginState = viewModel.appLoginState
+    val state = viewModel.state
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = viewModel::handleGoogleSignInResult,
     )
 
-    val clientId = stringResource(id = R.string.client_id)
+    LaunchedEffect(key1 = state) {
+        if (state is AppLoginState.Unused) {
+            viewModel.startGoogleSignIn(launcher::launch)
+        }
+    }
 
     Column {
         Button(
-            onClick = { viewModel.startGoogleSignIn(clientId, launcher::launch) },
-            enabled = viewModel.appLoginState !is AppLoginState.Loading,
+            onClick = { viewModel.startGoogleSignIn(launcher::launch) },
+            enabled = viewModel.state !is AppLoginState.Loading && viewModel.state !is AppLoginState.Success,
             modifier = modifier,
         ) {
-            Text(text = stringResource(id = R.string.app_name))
+            Text(text = stringResource(id = R.string.retry))
         }
         Button(
-            onClick = { viewModel.signOut(clientId) },
-            enabled = viewModel.appLoginState is AppLoginState.Success,
+            onClick = { viewModel.signOut() },
+            enabled = viewModel.state is AppLoginState.Success,
             modifier = modifier,
         ) {
-            Text(text = stringResource(id = R.string.client_id))
+            Text(text = stringResource(id = R.string.sign_out))
         }
-    }
-    when (appLoginState) {
-        is AppLoginState.Success -> Text(text = appLoginState.user.id)
-        else -> {}
+        when (state) {
+            is AppLoginState.Success -> Text(text = state.user.id)
+            else -> {}
+        }
     }
 }
