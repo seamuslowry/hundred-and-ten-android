@@ -31,7 +31,7 @@ sealed interface AppLoginState {
     data class Success(val user: User) : AppLoginState
     object Loading : AppLoginState
     object Error : AppLoginState
-    object Unused : AppLoginState
+    object LoggedOut : AppLoginState
 }
 
 @HiltViewModel
@@ -40,7 +40,7 @@ class LoginViewModel @Inject constructor(
     private val auth: AuthRepository,
     private val application: Application,
 ) : ViewModel() {
-    var state: AppLoginState by mutableStateOf(AppLoginState.Unused)
+    var state: AppLoginState by mutableStateOf(AppLoginState.LoggedOut)
         private set
 
     private val client by lazy {
@@ -90,7 +90,7 @@ class LoginViewModel @Inject constructor(
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Sign-in failed because:", e)
-                state = AppLoginState.Error // TODO error message
+                state = AppLoginState.Error
             }
     }
 
@@ -111,23 +111,21 @@ class LoginViewModel @Inject constructor(
 
                     viewModelScope.launch {
                         state = try {
-                            val token = repo.getAccessToken(idToken)
-                            val userId = getUserId(token) ?: throw Exception("token not readable")
-                            auth.saveToken(token)
-                            repo.getMe()
-                            AppLoginState.Success(User(userId, ""))
+                            val response = repo.loginWithGoogle(idToken)
+                            auth.saveToken(response.authenticationToken)
+                            AppLoginState.Success(User(response.user.userId, ""))
                         } catch (e: Exception) {
                             AppLoginState.Error
                         }
                     }
                 } catch (e: ApiException) {
                     Log.e(TAG, "Sign-in failed with error code:", e)
-                    state = AppLoginState.Error // TODO error message
+                    state = AppLoginState.Error
                 }
             }
             else -> {
                 Log.e(TAG, "Sign-in failed")
-                state = AppLoginState.Error // TODO error message
+                state = AppLoginState.Error
             }
         }
     }
@@ -138,6 +136,6 @@ class LoginViewModel @Inject constructor(
             auth.clear()
         }
         client.signOut()
-        state = AppLoginState.Unused
+        state = AppLoginState.LoggedOut
     }
 }

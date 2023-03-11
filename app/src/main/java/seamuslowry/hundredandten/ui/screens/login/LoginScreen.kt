@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +26,7 @@ fun LoginScreen(
     )
 
     LaunchedEffect(key1 = state) {
-        if (state is AppLoginState.Unused) {
+        if (state is AppLoginState.LoggedOut) {
             viewModel.startGoogleSignIn(launcher::launch)
         }
     }
@@ -47,6 +48,8 @@ fun LoginScreen(
         }
         when (state) {
             is AppLoginState.Success -> Text(text = state.user.id)
+            is AppLoginState.Error -> Text(text = stringResource(R.string.signInFailed))
+            is AppLoginState.Loading -> CircularProgressIndicator()
             else -> {}
         }
     }
