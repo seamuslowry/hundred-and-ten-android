@@ -5,9 +5,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import seamuslowry.hundredandten.BuildConfig
+import seamuslowry.hundredandten.data.AuthRepository
 import seamuslowry.hundredandten.sources.NetworkUserSource
 import seamuslowry.hundredandten.sources.UserSource
 import javax.inject.Singleton
@@ -19,10 +24,27 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUserApi(): UserSource = Retrofit.Builder()
+    fun provideUserApi(
+        auth: AuthRepository,
+    ): UserSource = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory(MediaType.get("application/json")))
-        // TODO see if this can be configured for local / staging / prod
-        .baseUrl("https://hundredandten-staging.azurewebsites.net")
+        .client(
+            OkHttpClient.Builder()
+                .addInterceptor {
+                    val builder = it.request().newBuilder()
+                    runBlocking {
+                        auth.authToken.first().let {
+                            builder.header(
+                                "X-ZUMO-AUTH",
+                                runBlocking { auth.authToken.first() ?: "" },
+                            )
+                        }
+                    }
+                    it.proceed(builder.build())
+                }
+                .build(),
+        )
+        .baseUrl(BuildConfig.GAME_API_URL)
         .build()
         .create(NetworkUserSource::class.java)
 }

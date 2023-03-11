@@ -6,10 +6,8 @@ import javax.inject.Inject
 
 interface UserRepository {
     suspend fun getAccessToken(idToken: String): String
-    suspend fun getMe(authToken: String) // TODO get rid of
-
-//    suspend fun getRefresh(authToken: String) // TODO return
-    suspend fun logout(authToken: String)
+    suspend fun getMe() // TODO get rid of
+    suspend fun logout()
 }
 
 class NetworkUserRepository @Inject constructor(
@@ -20,23 +18,15 @@ class NetworkUserRepository @Inject constructor(
         return response.authenticationToken
     }
 
-    override suspend fun logout(authToken: String) {
-        source.logout(authToken)
+    override suspend fun logout() {
+        source.logout()
     }
 
-    override suspend fun getMe(authToken: String) {
+    override suspend fun getMe() {
         try {
-            source.getMe(authToken)
+            source.getMe()
         } catch (e: Exception) {
             print(e)
         }
     }
-
-//    override suspend fun getRefresh(authToken: String) {
-//        try {
-//            source.getRefresh(authToken)
-//        } catch (e: Exception) {
-//            print(e)
-//        }
-//    }
 }

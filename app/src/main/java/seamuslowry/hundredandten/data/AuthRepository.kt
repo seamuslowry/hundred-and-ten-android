@@ -16,9 +16,8 @@ private const val TOKEN_KEY = "authToken"
 
 class AuthRepository @Inject constructor(@ApplicationContext private val context: Context) {
 
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = AUTH_STORE)
-
     private companion object {
+        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = AUTH_STORE)
         val AUTH_TOKEN = stringPreferencesKey(TOKEN_KEY)
     }
     suspend fun saveToken(token: String) {

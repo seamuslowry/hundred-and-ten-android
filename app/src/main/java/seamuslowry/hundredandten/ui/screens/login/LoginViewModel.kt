@@ -114,6 +114,7 @@ class LoginViewModel @Inject constructor(
                             val token = repo.getAccessToken(idToken)
                             val userId = getUserId(token) ?: throw Exception("token not readable")
                             auth.saveToken(token)
+                            repo.getMe()
                             AppLoginState.Success(User(userId, ""))
                         } catch (e: Exception) {
                             AppLoginState.Error
@@ -132,12 +133,10 @@ class LoginViewModel @Inject constructor(
     }
 
     fun signOut() {
-        val token = runBlocking { auth.authToken.first() }
-
-        viewModelScope.launch {
-            token?.let { repo.logout(it) }
+        runBlocking {
+            repo.logout()
+            auth.clear()
         }
-        runBlocking { auth.clear() }
         client.signOut()
         state = AppLoginState.Unused
     }
