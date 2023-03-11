@@ -15,6 +15,8 @@ import seamuslowry.hundredandten.R
 
 @Composable
 fun LoginScreen(
+    autoSelect: Boolean,
+    onComplete: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
@@ -29,11 +31,14 @@ fun LoginScreen(
         if (state is AppLoginState.LoggedOut) {
             viewModel.startGoogleSignIn(launcher::launch)
         }
+        if (state is AppLoginState.Success) {
+            onComplete()
+        }
     }
 
     Column {
         Button(
-            onClick = { viewModel.startGoogleSignIn(launcher::launch) },
+            onClick = { viewModel.startGoogleSignIn(launcher::launch, autoSelect) },
             enabled = viewModel.state !is AppLoginState.Loading && viewModel.state !is AppLoginState.Success,
             modifier = modifier,
         ) {
@@ -47,8 +52,7 @@ fun LoginScreen(
             Text(text = stringResource(id = R.string.sign_out))
         }
         when (state) {
-            is AppLoginState.Success -> Text(text = state.user.id)
-            is AppLoginState.Error -> Text(text = stringResource(R.string.signInFailed))
+            is AppLoginState.Error -> Text(text = stringResource(R.string.sign_in_failed))
             is AppLoginState.Loading -> CircularProgressIndicator()
             else -> {}
         }

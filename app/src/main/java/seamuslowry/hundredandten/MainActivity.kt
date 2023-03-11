@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import seamuslowry.hundredandten.ui.screens.login.LoginScreen
+import seamuslowry.hundredandten.ui.navigation.Navigation
 import seamuslowry.hundredandten.ui.theme.HundredAndTenTheme
 
 @AndroidEntryPoint
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    LoginScreen()
+                    Navigation()
                 }
             }
         }
