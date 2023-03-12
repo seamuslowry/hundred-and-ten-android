@@ -2,12 +2,15 @@ package seamuslowry.hundredandten.ui.screens.login
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,25 +39,24 @@ fun LoginScreen(
         }
     }
 
-    Column {
-        Button(
-            onClick = { viewModel.startGoogleSignIn(launcher::launch, autoSelect) },
-            enabled = viewModel.state !is AppLoginState.Loading && viewModel.state !is AppLoginState.Success,
-            modifier = modifier,
-        ) {
-            Text(text = stringResource(id = R.string.retry))
-        }
-        Button(
-            onClick = { viewModel.signOut() },
-            enabled = viewModel.state is AppLoginState.Success,
-            modifier = modifier,
-        ) {
-            Text(text = stringResource(id = R.string.sign_out))
-        }
-        when (state) {
-            is AppLoginState.Error -> Text(text = stringResource(R.string.sign_in_failed))
-            is AppLoginState.Loading -> CircularProgressIndicator()
-            else -> {}
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column {
+            when (state) {
+                is AppLoginState.Error -> {
+                    Button(
+                        onClick = { viewModel.startGoogleSignIn(launcher::launch, autoSelect) },
+                        enabled = viewModel.state !is AppLoginState.Loading && viewModel.state !is AppLoginState.Success,
+                    ) {
+                        Text(text = stringResource(id = R.string.retry))
+                    }
+                    Text(text = stringResource(R.string.sign_in_failed))
+                }
+                is AppLoginState.Loading -> CircularProgressIndicator()
+                else -> {}
+            }
         }
     }
 }
