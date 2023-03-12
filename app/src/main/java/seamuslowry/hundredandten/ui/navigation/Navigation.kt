@@ -12,10 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import seamuslowry.hundredandten.R
 import seamuslowry.hundredandten.ui.screens.login.LoginScreen
-import seamuslowry.hundredandten.ui.screens.splash.SplashScreen
 
 sealed class Screen<DataType>(protected val identifier: String, private val defaultData: DataType) {
-    object Splash : Screen<Unit>("splash", Unit)
     object Login : Screen<String>("login", "{autoSelect}") {
         const val autoSelect = "autoSelect"
         override fun route(data: String) = "$identifier?$autoSelect=$data"
@@ -27,29 +25,15 @@ sealed class Screen<DataType>(protected val identifier: String, private val defa
 
 @Composable
 fun Navigation(
-    onReady: () -> Unit,
+    startDestination: String,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Screen.Splash.route(),
+        startDestination = startDestination,
     ) {
-        composable(Screen.Splash.route()) {
-            SplashScreen(onComplete = {
-                navController.navigate(
-                    if (it.needsSignIn) {
-                        Screen.Login.route(it.autoSelect.toString())
-                    } else {
-                        Screen.Home.route()
-                    },
-                ) {
-                    popUpTo(Screen.Splash.route()) { inclusive = true }
-                }
-                onReady()
-            })
-        }
         composable(
             Screen.Login.route(),
             arguments = listOf(
