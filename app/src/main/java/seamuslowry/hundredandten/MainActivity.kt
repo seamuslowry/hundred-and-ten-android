@@ -16,8 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import seamuslowry.hundredandten.ui.navigation.Navigation
 import seamuslowry.hundredandten.ui.navigation.Screen
@@ -33,13 +32,9 @@ class MainActivity : ComponentActivity() {
 
         var state: MainActivityState by mutableStateOf(MainActivityState.Loading)
 
-        // Update the uiState
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state
-                    .onEach {
-                        state = it
-                    }.collect()
+                state = viewModel.state.first { it !is MainActivityState.Loading }
             }
         }
 
