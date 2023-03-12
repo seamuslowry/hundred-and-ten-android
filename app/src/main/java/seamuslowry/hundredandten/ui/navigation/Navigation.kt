@@ -27,6 +27,7 @@ sealed class Screen<DataType>(protected val identifier: String, private val defa
 
 @Composable
 fun Navigation(
+    onReady: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
@@ -46,6 +47,7 @@ fun Navigation(
                 ) {
                     popUpTo(Screen.Splash.route()) { inclusive = true }
                 }
+                onReady()
             })
         }
         composable(
