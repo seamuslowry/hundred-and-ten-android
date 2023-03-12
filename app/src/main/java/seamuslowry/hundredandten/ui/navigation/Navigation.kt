@@ -14,14 +14,15 @@ import seamuslowry.hundredandten.R
 import seamuslowry.hundredandten.ui.screens.login.LoginScreen
 import seamuslowry.hundredandten.ui.screens.splash.SplashScreen
 
-sealed class Screen(val identifier: String) {
-    object Splash : Screen("splash")
-    object Login : Screen("login") {
+sealed class Screen<DataType>(protected val identifier: String, private val defaultData: DataType) {
+    object Splash : Screen<Unit>("splash", Unit)
+    object Login : Screen<String>("login", "{autoSelect}") {
         const val autoSelect = "autoSelect"
-
-        fun route(arg: String = "{$autoSelect}") = "$identifier?$autoSelect=$arg"
+        override fun route(data: String) = "$identifier?$autoSelect=$data"
     }
-    object Home : Screen("home")
+    object Home : Screen<Unit>("home", Unit)
+
+    open fun route(data: DataType = defaultData) = identifier
 }
 
 @Composable
@@ -32,14 +33,18 @@ fun Navigation(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Screen.Splash.identifier,
+        startDestination = Screen.Splash.route(),
     ) {
-        composable(Screen.Splash.identifier) {
+        composable(Screen.Splash.route()) {
             SplashScreen(onComplete = {
-                if (it.needsSignIn) {
-                    navController.navigate(Screen.Login.route(it.autoSelect.toString()))
-                } else {
-                    navController.navigate(Screen.Home.identifier)
+                navController.navigate(
+                    if (it.needsSignIn) {
+                        Screen.Login.route(it.autoSelect.toString())
+                    } else {
+                        Screen.Home.route()
+                    },
+                ) {
+                    popUpTo(Screen.Splash.route()) { inclusive = true }
                 }
             })
         }
@@ -54,10 +59,14 @@ fun Navigation(
         ) {
             LoginScreen(
                 autoSelect = it.arguments?.getBoolean(Screen.Login.autoSelect) ?: false,
-                onComplete = { navController.navigate(Screen.Home.identifier) },
+                onComplete = {
+                    navController.navigate(Screen.Home.route()) {
+                        popUpTo(Screen.Login.route()) { inclusive = true }
+                    }
+                },
             )
         }
-        composable(Screen.Home.identifier) {
+        composable(Screen.Home.route()) {
             // TODO make this sign out to test the whole flow
             Text(text = stringResource(id = R.string.home))
         }
