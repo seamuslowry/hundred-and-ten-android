@@ -13,14 +13,14 @@ import androidx.navigation.navArgument
 import seamuslowry.hundredandten.R
 import seamuslowry.hundredandten.ui.screens.login.LoginScreen
 
-sealed class Screen<DataType>(protected val identifier: String, private val defaultData: DataType) {
-    object Login : Screen<String>("login", "{autoSelect}") {
+sealed class Screen<DataType>(protected val identifier: String, private val defaultData: DataType?) {
+    object Login : Screen<Boolean>("login", false) {
         const val autoSelect = "autoSelect"
-        override fun route(data: String) = "$identifier?$autoSelect=$data"
+        override fun route(data: Boolean?) = "$identifier?$autoSelect=${data ?: "{$autoSelect}"}"
     }
     object Home : Screen<Unit>("home", Unit)
 
-    open fun route(data: DataType = defaultData) = identifier
+    open fun route(data: DataType? = defaultData) = identifier
 }
 
 @Composable

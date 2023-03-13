@@ -26,7 +26,7 @@ private const val TAG = "LoginViewModel"
 
 sealed interface AppLoginState {
     data class Success(val user: User) : AppLoginState
-    object Loading : AppLoginState
+    object Loading : AppLoginState // TODO loading may need additional indicator to show work is happening after google sign in
     object Error : AppLoginState
     object LoggedOut : AppLoginState
 }
@@ -110,6 +110,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    // TODO move somewhere better
     fun signOut() {
         runBlocking {
             repo.logout()

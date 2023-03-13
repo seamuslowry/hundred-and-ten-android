@@ -52,8 +52,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     when (state) {
                         is MainActivityState.LoggedIn -> Screen.Home.route()
-                        is MainActivityState.NewUser -> Screen.Login.route(false.toString())
-                        is MainActivityState.ReSignIn -> Screen.Login.route(true.toString())
+                        is MainActivityState.NewUser -> Screen.Login.route(false)
+                        is MainActivityState.ReSignIn -> Screen.Login.route(true)
                         else -> null
                     }?.let { Navigation(it) }
                 }

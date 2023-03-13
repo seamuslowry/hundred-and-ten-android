@@ -43,7 +43,9 @@ fun LoginScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             when (state) {
                 is AppLoginState.Error -> {
                     Button(
