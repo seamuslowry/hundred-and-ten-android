@@ -26,9 +26,9 @@ object NetworkModule {
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
-    fun provideUserApi(
+    fun provideRetrofit(
         auth: AuthRepository,
-    ): UserSource = Retrofit.Builder()
+    ): Retrofit = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory(MediaType.get("application/json")))
         .client(
             OkHttpClient.Builder()
@@ -48,5 +48,10 @@ object NetworkModule {
         )
         .baseUrl(BuildConfig.GAME_API_URL)
         .build()
-        .create(NetworkUserSource::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUserApi(
+        retrofit: Retrofit,
+    ): UserSource = retrofit.create(NetworkUserSource::class.java)
 }
