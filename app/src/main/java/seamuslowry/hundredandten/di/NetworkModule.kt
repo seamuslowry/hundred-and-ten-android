@@ -24,34 +24,38 @@ object NetworkModule {
     private val json = Json { ignoreUnknownKeys = true }
 
     @OptIn(ExperimentalSerializationApi::class)
-    @Provides
-    @Singleton
-    fun provideRetrofit(
-        auth: AuthRepository,
+    private fun buildRetrofit(
+        client: OkHttpClient,
+        url: String,
     ): Retrofit = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory(MediaType.get("application/json")))
-        .client(
-            OkHttpClient.Builder()
-                .addInterceptor {
-                    val builder = it.request().newBuilder()
-                    runBlocking {
-                        auth.authToken.first().let {
-                            builder.header(
-                                "X-ZUMO-AUTH",
-                                runBlocking { auth.authToken.first() ?: "" },
-                            )
-                        }
-                    }
-                    it.proceed(builder.build())
+        .client(client)
+        .baseUrl(url)
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        auth: AuthRepository,
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor {
+            val builder = it.request().newBuilder()
+            runBlocking {
+                auth.authToken.first().let {
+                    builder.header(
+                        "X-ZUMO-AUTH",
+                        runBlocking { auth.authToken.first() ?: "" },
+                    )
                 }
-                .build(),
-        )
-        .baseUrl(BuildConfig.GAME_API_URL)
+            }
+            it.proceed(builder.build())
+        }
         .build()
 
     @Provides
     @Singleton
     fun provideUserApi(
-        retrofit: Retrofit,
-    ): UserSource = retrofit.create(NetworkUserSource::class.java)
+        client: OkHttpClient,
+    ): UserSource = buildRetrofit(client, BuildConfig.GAME_API_URL)
+        .create(NetworkUserSource::class.java)
 }
