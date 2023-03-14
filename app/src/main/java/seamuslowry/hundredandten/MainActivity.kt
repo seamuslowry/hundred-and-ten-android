@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     when (state) {
-                        is MainActivityState.LoggedIn -> Screen.Home.route()
+                        is MainActivityState.LoggedIn -> Screen.Settings.route()
                         is MainActivityState.NewUser -> Screen.Login.route(false)
                         is MainActivityState.ReSignIn -> Screen.Login.route(true)
                         else -> null

@@ -4,4 +4,6 @@
     <string name="sign_out">Sign Out</string>
     <string name="sign_in_failed">Sign in failed</string>
     <string name="home">Home</string>
+    <string name="log_out">Log Out</string>
+    <string name="log_out_error">Log Out Failed</string>
 </resources>

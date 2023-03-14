@@ -15,7 +15,6 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import seamuslowry.hundredandten.BuildConfig
 import seamuslowry.hundredandten.data.AuthRepository
 import seamuslowry.hundredandten.data.UserRepository
@@ -108,15 +107,5 @@ class LoginViewModel @Inject constructor(
                 state = AppLoginState.Error
             }
         }
-    }
-
-    // TODO move somewhere better
-    fun signOut() {
-        runBlocking {
-            repo.logout()
-            auth.clear()
-        }
-        client.signOut()
-        state = AppLoginState.LoggedOut
     }
 }
