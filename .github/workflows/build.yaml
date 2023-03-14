@@ -1,10 +1,10 @@
-name: Test
+name: Build
 
 on:
   - push
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,4 +21,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Run local tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew clean build
