@@ -7,6 +7,7 @@ import android.view.WindowInsetsController
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    Greeting("Android", modifier = Modifier.systemBarsPadding())
+                    Greeting(
+                        "Android",
+                        modifier = Modifier
+                            .systemBarsPadding()
+                            .displayCutoutPadding(), // background extends over camera edge, but content won't
+                    )
                 }
             }
         }
