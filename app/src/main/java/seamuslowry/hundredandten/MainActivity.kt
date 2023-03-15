@@ -1,6 +1,9 @@
 package seamuslowry.hundredandten
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +33,20 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Greeting("Android", modifier = Modifier.systemBarsPadding())
                 }
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        window.insetsController?.let {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                it.hide(WindowInsets.Type.systemBars())
+            } else {
+                it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_DEFAULT
+                it.show(WindowInsets.Type.systemBars())
             }
         }
     }
