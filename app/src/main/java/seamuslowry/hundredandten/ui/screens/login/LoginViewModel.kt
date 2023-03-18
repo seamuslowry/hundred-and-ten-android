@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.auth0.android.jwt.JWT
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
@@ -18,13 +19,12 @@ import kotlinx.coroutines.launch
 import seamuslowry.hundredandten.BuildConfig
 import seamuslowry.hundredandten.data.AuthRepository
 import seamuslowry.hundredandten.data.UserRepository
-import seamuslowry.hundredandten.models.User
 import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
 
 sealed interface AppLoginState {
-    data class Success(val user: User) : AppLoginState
+    object Success : AppLoginState
     object Loading : AppLoginState // TODO loading may need additional indicator to show work is happening after google sign in
     object Error : AppLoginState
     object LoggedOut : AppLoginState
@@ -88,11 +88,16 @@ class LoginViewModel @Inject constructor(
                         return@handleGoogleSignInResult
                     }
 
+                    val idJwt = JWT(idToken)
+                    val name = idJwt.getClaim("name").asString() ?: ""
+                    val pictureUrl = idJwt.getClaim("picture").asString() ?: ""
+
                     viewModelScope.launch {
                         state = try {
                             val response = repo.loginWithGoogle(idToken)
                             auth.saveToken(response.authenticationToken)
-                            AppLoginState.Success(User(response.user.userId, ""))
+                            repo.login(name, pictureUrl) // TODO verify this works
+                            AppLoginState.Success
                         } catch (e: Exception) {
                             AppLoginState.Error
                         }

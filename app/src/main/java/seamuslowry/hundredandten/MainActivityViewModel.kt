@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import seamuslowry.hundredandten.data.AuthRepository
-import seamuslowry.hundredandten.models.User
 import javax.inject.Inject
 
 private const val WEEK_IN_SECONDS = (7 * 12 * 60 * 60).toLong()
 sealed interface MainActivityState {
-    data class LoggedIn(val user: User) : MainActivityState
+    object LoggedIn : MainActivityState
     object ReSignIn : MainActivityState
     object NewUser : MainActivityState
     object Loading : MainActivityState
@@ -31,7 +30,7 @@ class MainActivityViewModel @Inject constructor(
 
         when {
             expiringSoon == true -> MainActivityState.ReSignIn
-            !userId.isNullOrBlank() -> MainActivityState.LoggedIn(User(userId, ""))
+            !userId.isNullOrBlank() -> MainActivityState.LoggedIn
             else -> MainActivityState.NewUser
         }
     }.stateIn(
