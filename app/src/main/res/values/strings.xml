@@ -7,4 +7,5 @@
     <string name="log_out">Log Out</string>
     <string name="log_out_error">Log Out Failed</string>
     <string name="creating_account">Creating your account...</string>
+    <string name="name">Name</string>
 </resources>

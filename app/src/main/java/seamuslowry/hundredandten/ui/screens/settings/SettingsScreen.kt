@@ -1,6 +1,6 @@
 package seamuslowry.hundredandten.ui.screens.settings
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,18 +38,33 @@ fun SettingsScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = modifier
             .padding(16.dp)
             .fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter,
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        UserForm()
         LogoutButton(
             onClick = { scope.launch { viewModel.signOut() } },
             enabled = state !is SettingsState.Loading && state !is SettingsState.LoggedOut,
             error = state is SettingsState.Error,
         )
     }
+}
+
+@Composable
+fun UserForm(
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = "",
+        onValueChange = {},
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(text = stringResource(R.string.name)) },
+        singleLine = true,
+    )
 }
 
 @Composable
