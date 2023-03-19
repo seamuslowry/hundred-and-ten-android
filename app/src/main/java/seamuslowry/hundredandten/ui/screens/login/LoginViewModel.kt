@@ -23,11 +23,16 @@ import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
 
-sealed interface AppLoginState {
-    object Success : AppLoginState
-    object Loading : AppLoginState // TODO loading may need additional indicator to show work is happening after google sign in
-    object Error : AppLoginState
-    object LoggedOut : AppLoginState
+enum class LoadingStep {
+    GOOGLE,
+    GAME_API,
+}
+
+sealed interface LoginState {
+    object Success : LoginState
+    data class Loading(val step: LoadingStep) : LoginState
+    object Error : LoginState
+    object LoggedOut : LoginState
 }
 
 @HiltViewModel
@@ -36,7 +41,7 @@ class LoginViewModel @Inject constructor(
     private val auth: AuthRepository,
     private val application: Application,
 ) : ViewModel() {
-    var state: AppLoginState by mutableStateOf(AppLoginState.LoggedOut)
+    var state: LoginState by mutableStateOf(LoginState.LoggedOut)
         private set
 
     private val client by lazy {
@@ -47,7 +52,7 @@ class LoginViewModel @Inject constructor(
         launchActivityResult: (IntentSenderRequest) -> Unit,
         autoSelect: Boolean = false,
     ) {
-        state = AppLoginState.Loading
+        state = LoginState.Loading(LoadingStep.GOOGLE)
 
         client
             .beginSignIn(
@@ -69,7 +74,7 @@ class LoginViewModel @Inject constructor(
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Sign-in failed because:", e)
-                state = AppLoginState.Error
+                state = LoginState.Error
             }
     }
 
@@ -78,13 +83,14 @@ class LoginViewModel @Inject constructor(
     ) {
         when (result.resultCode) {
             ComponentActivity.RESULT_OK -> {
+                state = LoginState.Loading(LoadingStep.GAME_API)
                 try {
                     val signInCredentials = Identity.getSignInClient(application)
                         .getSignInCredentialFromIntent(result.data)
 
                     val idToken = signInCredentials.googleIdToken ?: run {
                         // TODO use ID token to get user picture url
-                        state = AppLoginState.Error // TODO error message
+                        state = LoginState.Error // TODO error message
                         return@handleGoogleSignInResult
                     }
 
@@ -97,19 +103,19 @@ class LoginViewModel @Inject constructor(
                             val response = repo.loginWithGoogle(idToken)
                             auth.saveToken(response.authenticationToken)
                             repo.login(name, pictureUrl) // TODO verify this works
-                            AppLoginState.Success
+                            LoginState.Success
                         } catch (e: Exception) {
-                            AppLoginState.Error
+                            LoginState.Error
                         }
                     }
                 } catch (e: ApiException) {
                     Log.e(TAG, "Sign-in failed with error code:", e)
-                    state = AppLoginState.Error
+                    state = LoginState.Error
                 }
             }
             else -> {
                 Log.e(TAG, "Sign-in failed")
-                state = AppLoginState.Error
+                state = LoginState.Error
             }
         }
     }

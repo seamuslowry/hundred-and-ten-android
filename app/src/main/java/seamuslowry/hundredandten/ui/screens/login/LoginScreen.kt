@@ -2,6 +2,7 @@ package seamuslowry.hundredandten.ui.screens.login
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,10 +32,10 @@ fun LoginScreen(
     )
 
     LaunchedEffect(key1 = state) {
-        if (state is AppLoginState.LoggedOut) {
+        if (state is LoginState.LoggedOut) {
             viewModel.startGoogleSignIn(launcher::launch)
         }
-        if (state is AppLoginState.Success) {
+        if (state is LoginState.Success) {
             onComplete()
         }
     }
@@ -47,16 +48,21 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (state) {
-                is AppLoginState.Error -> {
+                is LoginState.Error -> {
                     Button(
                         onClick = { viewModel.startGoogleSignIn(launcher::launch, autoSelect) },
-                        enabled = viewModel.state !is AppLoginState.Loading && viewModel.state !is AppLoginState.Success,
+                        enabled = viewModel.state !is LoginState.Loading && viewModel.state !is LoginState.Success,
                     ) {
                         Text(text = stringResource(id = R.string.retry))
                     }
                     Text(text = stringResource(R.string.sign_in_failed))
                 }
-                is AppLoginState.Loading -> CircularProgressIndicator()
+                is LoginState.Loading -> {
+                    CircularProgressIndicator()
+                    AnimatedVisibility(visible = state.step == LoadingStep.GAME_API) {
+                        Text(text = stringResource(R.string.creating_account))
+                    }
+                }
                 else -> {}
             }
         }
