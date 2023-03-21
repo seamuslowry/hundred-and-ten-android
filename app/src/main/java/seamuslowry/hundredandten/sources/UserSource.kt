@@ -3,7 +3,6 @@ package seamuslowry.hundredandten.sources
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import seamuslowry.hundredandten.sources.models.GoogleUserRequest
 import seamuslowry.hundredandten.sources.models.GoogleUserResponse
 import seamuslowry.hundredandten.sources.models.User
@@ -22,7 +21,7 @@ interface NetworkUserSource : UserSource {
         @Body request: GoogleUserRequest,
     ): GoogleUserResponse
 
-    @PUT("api/self")
+    @POST("api/self")
     override suspend fun login(
         @Body request: User,
     ): User

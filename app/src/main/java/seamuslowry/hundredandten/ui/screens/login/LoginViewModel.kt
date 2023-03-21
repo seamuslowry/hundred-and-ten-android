@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.auth0.android.jwt.JWT
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
@@ -89,20 +88,18 @@ class LoginViewModel @Inject constructor(
                         .getSignInCredentialFromIntent(result.data)
 
                     val idToken = signInCredentials.googleIdToken ?: run {
-                        // TODO use ID token to get user picture url
                         state = LoginState.Error // TODO error message
                         return@handleGoogleSignInResult
                     }
 
-                    val idJwt = JWT(idToken)
-                    val name = idJwt.getClaim("name").asString() ?: ""
-                    val pictureUrl = idJwt.getClaim("picture").asString() ?: ""
+                    val name = signInCredentials.givenName ?: ""
+                    val pictureUrl = signInCredentials.profilePictureUri?.toString() ?: ""
 
                     viewModelScope.launch {
                         state = try {
                             val response = repo.loginWithGoogle(idToken)
                             auth.saveToken(response.authenticationToken)
-                            repo.login(name, pictureUrl) // TODO verify this works
+                            repo.login(name, pictureUrl)
                             LoginState.Success
                         } catch (e: Exception) {
                             LoginState.Error
