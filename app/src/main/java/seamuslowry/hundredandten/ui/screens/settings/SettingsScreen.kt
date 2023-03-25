@@ -63,7 +63,7 @@ fun SettingsScreen(
         LogoutButton(
             onClick = { scope.launch { viewModel.signOut() } },
             enabled = state !is SettingsState.Loading && state !is SettingsState.LoggedOut,
-            error = state is SettingsState.Error,
+            error = state is SettingsState.Error && state.error == SettingsError.LOGOUT,
         )
     }
 }
