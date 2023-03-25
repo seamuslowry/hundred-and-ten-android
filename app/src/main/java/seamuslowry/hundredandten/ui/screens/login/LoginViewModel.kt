@@ -99,7 +99,8 @@ class LoginViewModel @Inject constructor(
                         state = try {
                             val response = repo.loginWithGoogle(idToken)
                             auth.saveToken(response.authenticationToken)
-                            repo.login(name, pictureUrl)
+                            val user = repo.login(name, pictureUrl)
+                            auth.saveUser(user)
                             LoginState.Success
                         } catch (e: Exception) {
                             LoginState.Error

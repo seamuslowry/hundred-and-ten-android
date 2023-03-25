@@ -11,6 +11,8 @@ interface UserRepository {
 
     suspend fun login(name: String, pictureUrl: String): User
 
+    suspend fun update(name: String, pictureUrl: String): User
+
     suspend fun logout()
 }
 
@@ -20,6 +22,8 @@ class NetworkUserRepository @Inject constructor(
     override suspend fun loginWithGoogle(idToken: String) = source.getGoogleUser(GoogleUserRequest(idToken))
 
     override suspend fun login(name: String, pictureUrl: String) = source.login(User("", name, pictureUrl))
+
+    override suspend fun update(name: String, pictureUrl: String) = source.updateSelf(User("", name, pictureUrl))
 
     override suspend fun logout() {
         source.logout()

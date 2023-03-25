@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import seamuslowry.hundredandten.R
+import seamuslowry.hundredandten.sources.models.User
 import seamuslowry.hundredandten.ui.theme.HundredAndTenTheme
 
 @Composable
@@ -45,7 +46,20 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        UserForm()
+        // TODO cursor being weird here; appearing at front on first click
+        OutlinedTextField(
+            value = "test",
+            onValueChange = { },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = stringResource(R.string.name)) },
+            singleLine = true,
+        )
+        when {
+            state is SettingsState.Editable -> UserForm(user = state.user, onChange = viewModel::updateUser, onSave = { scope.launch { viewModel.saveUser() } })
+            state is SettingsState.Loading -> UserForm(state.user, enabled = false)
+            state is SettingsState.Error && state.error == SettingsError.SAVE_USER -> UserForm(state.user, error = true)
+            else -> {}
+        }
         LogoutButton(
             onClick = { scope.launch { viewModel.signOut() } },
             enabled = state !is SettingsState.Loading && state !is SettingsState.LoggedOut,
@@ -56,15 +70,36 @@ fun SettingsScreen(
 
 @Composable
 fun UserForm(
+    user: User,
     modifier: Modifier = Modifier,
+    onChange: (user: User) -> Unit = {},
+    onSave: () -> Unit = {},
+    enabled: Boolean = true,
+    error: Boolean = false,
 ) {
-    OutlinedTextField(
-        value = "",
-        onValueChange = {},
-        modifier = modifier.fillMaxWidth(),
-        label = { Text(text = stringResource(R.string.name)) },
-        singleLine = true,
-    )
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = user.name,
+            onValueChange = { onChange(user.copy(name = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = stringResource(R.string.name)) },
+            singleLine = true,
+            enabled = enabled,
+        )
+        Button(
+            onClick = onSave,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+        ) {
+            if (!enabled) {
+                CircularProgressIndicator()
+            }
+            Text(text = stringResource(R.string.save))
+        }
+        if (error) {
+            Text(text = stringResource(R.string.save_fail), color = MaterialTheme.colorScheme.error)
+        }
+    }
 }
 
 @Composable
