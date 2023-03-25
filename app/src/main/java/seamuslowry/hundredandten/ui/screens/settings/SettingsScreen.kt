@@ -33,7 +33,7 @@ fun SettingsScreen(
     val state = viewModel.state
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = state) {
+    LaunchedEffect(state) {
         if (state is SettingsState.LoggedOut) {
             onLogout()
         }
@@ -46,18 +46,10 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // TODO cursor being weird here; appearing at front on first click
-        OutlinedTextField(
-            value = "test",
-            onValueChange = { },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = stringResource(R.string.name)) },
-            singleLine = true,
-        )
-        when {
-            state is SettingsState.Editable -> UserForm(user = state.user, onChange = viewModel::updateUser, onSave = { scope.launch { viewModel.saveUser() } })
-            state is SettingsState.Loading -> UserForm(state.user, enabled = false)
-            state is SettingsState.Error && state.error == SettingsError.SAVE_USER -> UserForm(state.user, error = true)
+        when (state) {
+            is SettingsState.Editable -> UserForm(user = state.user, onChange = viewModel::updateUser, onSave = { scope.launch { viewModel.saveUser() } })
+            is SettingsState.Loading -> UserForm(state.user, enabled = false)
+            is SettingsState.Error -> UserForm(state.user, error = state.error == SettingsError.SAVE_USER)
             else -> {}
         }
         LogoutButton(
@@ -80,7 +72,9 @@ fun UserForm(
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = user.name,
-            onValueChange = { onChange(user.copy(name = it)) },
+            onValueChange = {
+                onChange(user.copy(name = it))
+            },
             modifier = Modifier.fillMaxWidth(),
             label = { Text(text = stringResource(R.string.name)) },
             singleLine = true,
