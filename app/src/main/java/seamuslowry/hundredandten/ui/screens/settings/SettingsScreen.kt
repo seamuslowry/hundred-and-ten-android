@@ -33,8 +33,8 @@ fun SettingsScreen(
     val state = viewModel.state
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(state) {
-        if (state is SettingsState.LoggedOut) {
+    LaunchedEffect(state.loggedOut) {
+        if (state.loggedOut) {
             onLogout()
         }
     }
@@ -46,16 +46,19 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        when (state) {
-            is SettingsState.Editable -> UserForm(user = state.user, onChange = viewModel::updateUser, onSave = { scope.launch { viewModel.saveUser() } })
-            is SettingsState.Loading -> UserForm(state.user, enabled = false)
-            is SettingsState.Error -> UserForm(state.user, error = state.error == SettingsError.SAVE_USER)
-            else -> {}
-        }
+        UserForm(
+            user = state.user,
+            onChange = viewModel::updateUser,
+            onSave = { scope.launch { viewModel.saveUser() } },
+            enabled = !state.loading.contains(SettingsBehavior.LOAD_USER) &&
+                !state.loading.contains(SettingsBehavior.SAVE_USER),
+            error = state.errors.contains(SettingsBehavior.SAVE_USER),
+        )
         LogoutButton(
             onClick = { scope.launch { viewModel.signOut() } },
-            enabled = state !is SettingsState.Loading && state !is SettingsState.LoggedOut,
-            error = state is SettingsState.Error && state.error == SettingsError.LOGOUT,
+            enabled = !state.loading.contains(SettingsBehavior.LOAD_USER) &&
+                !state.loading.contains(SettingsBehavior.LOGOUT),
+            error = state.errors.contains(SettingsBehavior.LOGOUT),
         )
     }
 }

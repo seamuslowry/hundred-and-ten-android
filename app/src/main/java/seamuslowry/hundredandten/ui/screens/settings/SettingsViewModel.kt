@@ -16,19 +16,18 @@ import seamuslowry.hundredandten.data.UserRepository
 import seamuslowry.hundredandten.sources.models.User
 import javax.inject.Inject
 
-enum class SettingsError {
+enum class SettingsBehavior {
+    LOAD_USER,
     SAVE_USER,
     LOGOUT,
 }
 
-sealed interface SettingsState {
-    object LoggedOut : SettingsState
-    data class Loading(val user: User = User("")) : SettingsState
-    data class Error(val user: User = User(""), val error: SettingsError) : SettingsState
-    data class Editable(
-        val user: User,
-    ) : SettingsState
-}
+data class SettingsState(
+    val user: User = User(""),
+    val loading: Set<SettingsBehavior> = emptySet(),
+    val errors: Set<SettingsBehavior> = emptySet(),
+    val loggedOut: Boolean = false,
+)
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -36,8 +35,11 @@ class SettingsViewModel @Inject constructor(
     private val auth: AuthRepository,
     private val application: Application,
 ) : ViewModel() {
-    var state: SettingsState by mutableStateOf(SettingsState.Loading())
-        private set
+    var state: SettingsState by mutableStateOf(
+        SettingsState(
+            loading = setOf(SettingsBehavior.LOAD_USER),
+        ),
+    )
 
     private val client by lazy {
         Identity.getSignInClient(application)
@@ -45,8 +47,10 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            state = SettingsState.Editable(
-                auth.user
+            state = state.copy(
+                loading = state.loading.minus(SettingsBehavior.LOAD_USER),
+                errors = state.errors.minus(SettingsBehavior.LOAD_USER),
+                user = auth.user
                     .filterNotNull()
                     .first(),
             )
@@ -54,35 +58,39 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateUser(user: User) {
-        state = SettingsState.Editable(user)
+        state = state.copy(user = user)
     }
 
     suspend fun saveUser() {
-        val currentState = state
-        if (currentState is SettingsState.Editable) {
-            try {
-                state = SettingsState.Loading(currentState.user)
-                val newUser = repo.update(currentState.user.name, currentState.user.pictureUrl)
-                auth.saveUser(newUser)
-                state = SettingsState.Editable(newUser)
-            } catch (e: Exception) {
-                state = SettingsState.Error(currentState.user, SettingsError.SAVE_USER)
-            }
+        state = state.copy(
+            loading = state.loading.plus(SettingsBehavior.SAVE_USER),
+            errors = state.errors.minus(SettingsBehavior.LOAD_USER),
+        )
+        try {
+            val newUser = repo.update(state.user.name, state.user.pictureUrl)
+            auth.saveUser(newUser)
+            state = state.copy(user = newUser)
+        } catch (e: Exception) {
+            state = state.copy(errors = state.errors.plus(SettingsBehavior.SAVE_USER))
+        } finally {
+            state = state.copy(loading = state.loading.minus(SettingsBehavior.SAVE_USER))
         }
     }
 
     suspend fun signOut() {
-        val currentState = state
-        if (currentState !is SettingsState.Editable) return
-
+        state = state.copy(
+            loading = state.loading.plus(SettingsBehavior.LOGOUT),
+            errors = state.errors.minus(SettingsBehavior.LOGOUT),
+        )
         try {
-            state = SettingsState.Loading(currentState.user)
             repo.logout()
             auth.clear()
             client.signOut()
-            state = SettingsState.LoggedOut
+            state = state.copy(loggedOut = true)
         } catch (e: Exception) {
-            state = SettingsState.Error(currentState.user, SettingsError.LOGOUT)
+            state = state.copy(errors = state.errors.plus(SettingsBehavior.LOGOUT))
+        } finally {
+            state = state.copy(loading = state.loading.minus(SettingsBehavior.SAVE_USER))
         }
     }
 }
