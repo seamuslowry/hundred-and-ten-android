@@ -1,12 +1,13 @@
 package seamuslowry.hundredandten.ui.screens.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -16,13 +17,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import seamuslowry.hundredandten.R
 import seamuslowry.hundredandten.sources.models.User
-import seamuslowry.hundredandten.ui.theme.HundredAndTenTheme
+import androidx.compose.material3.Button as MaterialButton
 
 @Composable
 fun SettingsScreen(
@@ -85,9 +85,6 @@ fun UserForm(
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
         ) {
-            if (!enabled) {
-                CircularProgressIndicator()
-            }
             Text(text = stringResource(R.string.save))
         }
         if (error) {
@@ -112,9 +109,6 @@ fun LogoutButton(
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            if (!enabled) {
-                CircularProgressIndicator()
-            }
             Text(text = stringResource(R.string.log_out))
         }
         if (error) {
@@ -124,9 +118,22 @@ fun LogoutButton(
 }
 
 @Composable
-@Preview(showBackground = true)
-fun LogoutPreview() {
-    HundredAndTenTheme {
-        LogoutButton(onClick = { /*TODO*/ }, error = true)
+fun Button(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    MaterialButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (!enabled) {
+                LinearProgressIndicator()
+            }
+            content()
+        }
     }
 }
