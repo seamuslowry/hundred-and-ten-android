@@ -6,7 +6,7 @@
     <string name="home">Home</string>
     <string name="log_out">Log Out</string>
     <string name="log_out_error">Log Out Failed</string>
-    <string name="creating_account">Creating your account...</string>
+    <string name="finalizing_sign_in">Signing in...</string>
     <string name="name">Name</string>
     <string name="save">Save</string>
     <string name="save_fail">Save failed</string>

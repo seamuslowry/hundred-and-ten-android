@@ -60,7 +60,7 @@ fun LoginScreen(
                 is LoginState.Loading -> {
                     CircularProgressIndicator()
                     AnimatedVisibility(visible = state.step == LoadingStep.GAME_API) {
-                        Text(text = stringResource(R.string.creating_account))
+                        Text(text = stringResource(R.string.finalizing_sign_in))
                     }
                 }
                 else -> {}

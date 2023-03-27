@@ -88,7 +88,7 @@ class LoginViewModel @Inject constructor(
                         .getSignInCredentialFromIntent(result.data)
 
                     val idToken = signInCredentials.googleIdToken ?: run {
-                        state = LoginState.Error // TODO error message
+                        state = LoginState.Error
                         return@handleGoogleSignInResult
                     }
 
